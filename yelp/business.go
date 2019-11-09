@@ -112,6 +112,12 @@ type Location struct {
 	GeoAccuracy    float32    `json:"Geo_accuracy"` // Geo accuracy for the location.
 }
 
+// Category details
+type Category struct {
+	Alias string
+	Title string
+}
+
 // Business information is returned in full from the business API, or shallow from the search API.
 type Business struct {
 	ID                string            // Yelp ID for this business
@@ -122,7 +128,7 @@ type Business struct {
 	Phone             string            // Phone number for this business with international dialing code (e.g. +442079460000)
 	DisplayPhone      string            `json:"Display_phone"` // Phone number for this business formatted for display
 	ReviewCount       int               `json:"Review_count"`  // Number of reviews for this business
-	Categories        [][]string        // Provides a list of category name, alias pairs that this business is associated with. The alias is provided so you can search with the category_filter.
+	Categories        []Category        // Provides a list of category name, alias pairs that this business is associated with. The alias is provided so you can search with the category_filter.
 	Distance          float32           // Distance that business is from search location in meters, if a latitude/longitude is specified.
 	Rating            float32           // Rating for this business (value ranges from 1, 1.5, ... 4.5, 5)
 	RatingImgURL      string            `json:"Rating_img_URL"`       // URL to star rating image for this business (size = 84x17)

@@ -40,12 +40,9 @@ func getClient(t *testing.T) *Client {
 	if err != nil {
 		// if the file isn't there, check environment variables
 		o = &AuthOptions{
-			ConsumerKey:       os.Getenv("CONSUMER_KEY"),
-			ConsumerSecret:    os.Getenv("CONSUMER_SECRET"),
-			AccessToken:       os.Getenv("ACCESS_TOKEN"),
-			AccessTokenSecret: os.Getenv("ACCESS_TOKEN_SECRET"),
+			YelpAPIKey: os.Getenv("YELP_API_KEY"),
 		}
-		if o.ConsumerKey == "" || o.ConsumerSecret == "" || o.AccessToken == "" || o.AccessTokenSecret == "" {
+		if o.YelpAPIKey == "" {
 			check(t, errors.New("to run tests, keys must be provided either in a config.json file at the root of the repo, or in environment variables"))
 		}
 	} else {

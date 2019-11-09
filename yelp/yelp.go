@@ -7,14 +7,12 @@ import (
 	"errors"
 	"net/http"
 	"net/url"
-
-	"github.com/JustinBeckwith/oauth"
 )
 
 const (
-	rootURI      = "http://api.yelp.com/"
-	businessArea = "/v2/business"
-	searchArea   = "/v2/search"
+	rootURI      = "https://api.yelp.com/"
+	businessArea = "/v3/businesses"
+	searchArea   = "/v3/businesses/search"
 )
 
 var (
@@ -23,12 +21,9 @@ var (
 )
 
 // AuthOptions provide keys required for using the Yelp API.  Find more
-// information here:  http://www.yelp.com/developers/documentation.
+// information here:  https://www.yelp.com/developers/documentation/v3/authentication
 type AuthOptions struct {
-	ConsumerKey       string // Consumer Key from the yelp API access site.
-	ConsumerSecret    string // Consumer Secret from the yelp API access site.
-	AccessToken       string // Token from the yelp API access site.
-	AccessTokenSecret string // Token Secret from the yelp API access site.
+	YelpAPIKey string // API key from the yelp fusion API access site
 }
 
 // Client manages all searches.  All searches are performed from an instance of a client.
@@ -75,6 +70,7 @@ func (client *Client) DoSearch(options SearchOptions) (result SearchResult, err 
 	if err != nil {
 		return SearchResult{}, err
 	}
+
 	return result, nil
 }
 
@@ -104,35 +100,35 @@ func (client *Client) makeRequest(area string, id string, params map[string]stri
 	// add the type of request we're making (search|business)
 	queryURI.Path = area
 
+	// if an id is provided, add it too
 	if id != "" {
 		queryURI.Path += "/" + id
 	}
 
-	// set up OAUTH
-	c := oauth.NewCustomHttpClientConsumer(
-		client.Options.ConsumerKey,
-		client.Options.ConsumerSecret,
-		oauth.ServiceProvider{
-			RequestTokenUrl:   "",
-			AuthorizeTokenUrl: "",
-			AccessTokenUrl:    "",
-		},
-		client.Client)
-	token := &oauth.AccessToken{
-		client.Options.AccessToken,
-		client.Options.AccessTokenSecret,
-		make(map[string]string),
+	// add query params
+	if len(params) > 0 {
+		queryString := queryURI.Query()
+		for key, val := range params {
+			queryString.Set(key, val)
+		}
+		queryURI.RawQuery = queryString.Encode()
 	}
 
-	// make the request using the oauth lib
-	response, err := c.Get(queryURI.String(), params, token)
+	// create a new request using http
+	request, err := http.NewRequest("GET", queryURI.String(), nil)
+
+	// add Authorization header to request
+	bearer := "Bearer " + client.Options.YelpAPIKey
+	request.Header.Add("Authorization", bearer)
+
+	// execute the request using http Client
+	response, err := client.Client.Do(request)
 
 	if err != nil {
 		if response != nil {
 			return response.StatusCode, err
-		} else {
-			return 500, err
 		}
+		return 500, err
 	}
 
 	// close the request when done
