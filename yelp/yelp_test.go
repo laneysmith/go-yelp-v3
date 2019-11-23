@@ -65,9 +65,8 @@ func TestSimpleSearch(t *testing.T) {
 	assert(t, len(result.Businesses) > 0, containsResults)
 
 	// verify basic fields are returned
-	assert(t, result.Region.Span.LatitudeDelta != 0, "latitude is returned")
-	assert(t, result.Region.Span.LongitudeDelta != 0, "longitude is returned")
-
+	assert(t, result.Region.Center.Latitude != 0, "latitude is returned")
+	assert(t, result.Region.Center.Longitude != 0, "longitude is returned")
 }
 
 // TestNoLocation ensures validation for a missing location in the search.
